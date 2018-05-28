@@ -1,0 +1,24 @@
+export(
+	"calculate.number.at.risk",
+        "CUREcoxph",
+	"dichotomize.dataset",
+        "esttime.logrank.perm",
+	"fit.coxmodel", 
+	"logrank.analysis",
+        "logrank.perm",
+	"ph.fails",
+	"power.analysis",
+	"multi.point.HR.table",
+	"calculate.median.followUp.time",
+	"get.survival.rate",
+	"parse.cox.table",
+	"stratacox"
+	)
+import(survival);
+import(stringr);
+import(data.table);
+import(doParallel);
+import(parallel);
+import(rbenchmark);
+importFrom("stats", "complete.cases", "median", "pchisq", "pnorm",
+             "qnorm");

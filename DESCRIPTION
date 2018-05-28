@@ -1,0 +1,11 @@
+Package: BoutrosLab.statistics.survival
+Version: 0.4.20
+Type: Package
+Title: Utility Statistical Functions for Survival Analyses
+Date: 2016-04-21
+Author: Dr. Paul C. Boutros
+Maintainer: Paul Boutros <Paul.Boutros@oicr.on.ca>
+Depends: R (>= 2.13.1), survival (>= 2.36-9), stringr, data.table, doParallel, parallel, rbenchmark
+Description: Contains statistical functions.
+License: GPL-2
+LazyLoad: yes
