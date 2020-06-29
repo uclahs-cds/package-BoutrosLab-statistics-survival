@@ -1,0 +1,9 @@
+Category: "tool"
+Description: "repository for BoutrosLab.statistics.survival R package"
+Maintainers: "Dr. Paul C. Boutros"
+Contributors: "Dr. Paul C. Boutros"
+Languages: ["R"]
+Dependencies: ["R (>= 2.13.1)", "survival (>= 2.36-9)", "stringr", "data.table", "doParallel", "parallel", "rbenchmark"]
+References: ""
+Version: "0.4.20"
+Purpose of tool: "Utility Statistical Functions for Survival Analyses"
