@@ -9,3 +9,4 @@ Depends: R (>= 2.13.1), survival (>= 2.36-9), stringr, data.table, doParallel, p
 Description: Contains statistical functions.
 License: GPL-2
 LazyLoad: yes
+URL: https://uclahs-cds.github.io/public-R-BoutrosLab-statistics-survival/
