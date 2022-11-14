@@ -1,4 +1,9 @@
-multi.point.HR.table <- function(all.groups = NULL, all.survtime = NULL, all.survstat = NULL, truncation.thresholds = c(5, 10), covariates = NULL) {
+multi.point.HR.table <- function(all.groups = NULL, all.survtime = NULL, all.survstat = NULL, truncation.thresholds = NULL, covariates = NULL) {
+	# define default truncation.thresholds as the median survival time and maximum
+	if(is.null(truncation.thresholds)){
+		fit <- survfit(Surv(all.survtime, all.survstat) ~ 1);
+		truncation.thresholds <- c(summary(fit)$table["median"], max(all.survtime, na.rm = TRUE));
+	}
 
 	# sanity checks:
 	# remove NA data points
