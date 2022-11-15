@@ -2,7 +2,7 @@ multi.point.HR.table <- function(all.groups = NULL, all.survtime = NULL, all.sur
 	# define default truncation.thresholds as the median survival time and maximum
 	if (is.null(truncation.thresholds)) {
 		fit <- survfit(Surv(all.survtime, all.survstat) ~ 1);
-		truncation.thresholds <- c(summary(fit)$table['median'], max(all.survtime, na.rm = TRUE));
+		truncation.thresholds <- c(median(all.survtime, na.rm = TRUE), max(all.survtime, na.rm = TRUE));
 	}
 
 	# sanity checks:
