@@ -1,4 +1,9 @@
-multi.point.HR.table <- function(all.groups = NULL, all.survtime = NULL, all.survstat = NULL, truncation.thresholds = c(5, 10), covariates = NULL) {
+multi.point.HR.table <- function(all.groups = NULL, all.survtime = NULL, all.survstat = NULL, truncation.thresholds = NULL, covariates = NULL) {
+	# define default truncation.thresholds as the median survival time and maximum
+	if (is.null(truncation.thresholds)) {
+		fit <- survfit(Surv(all.survtime, all.survstat) ~ 1);
+		truncation.thresholds <- c(median(all.survtime, na.rm = TRUE), max(all.survtime, na.rm = TRUE));
+	}
 
 	# sanity checks:
 	# remove NA data points
@@ -8,19 +13,19 @@ multi.point.HR.table <- function(all.groups = NULL, all.survtime = NULL, all.sur
 	all.survstat <- all.survstat[complete.data.points];
 
 	if (length(all.survtime[all.survtime == 0]) > 0) {
-		cat("\nWarning: survtime for some samples is zero, setting it to 0.000001");
+		cat('\nWarning: survtime for some samples is zero, setting it to 0.000001');
 		all.survtime[all.survtime == 0] <- 0.000001;
 		}
 
 	# make sure max surv time is less than max cut point
 	max.surv <- max(all.survtime, na.rm = TRUE);
-	if(max.surv < max(truncation.thresholds)){
+	if (max.surv < max(truncation.thresholds)) {
 		new.cut.points <- c(max.surv / 2, max.surv);
 		truncation.thresholds <- new.cut.points;
-		print(paste("Warning: max survtime was less than max cut point. New cut points are", new.cut.points));
+		print(paste('Warning: max survtime was less than max cut point. New cut points are', new.cut.points));
 		}
 
-	tmp.data <- as.data.frame( cbind("time" = all.survtime, "status" = all.survstat, "fu.time" = all.survtime) );
+	tmp.data <- as.data.frame( cbind('time' = all.survtime, 'status' = all.survstat, 'fu.time' = all.survtime) );
 
 	# only extract these stats from each variable in the cox models
 	stats.to.keep <- c('HR', 'CI95l', 'CI95h', 'cox.p', 'ph.p');
@@ -30,13 +35,13 @@ multi.point.HR.table <- function(all.groups = NULL, all.survtime = NULL, all.sur
 		formula = Surv(time, status) ~ .,
 		data = tmp.data,
 		cut = truncation.thresholds,
-		end = "time",
-		start = "start",
-		event = "status"
+		end = 'time',
+		start = 'start',
+		event = 'status'
 		);
 
 	# format as desired, stats as columns, and chunks of columns denote different variables from the Cox model
-	if(is.null(covariates)){	# no covariates
+	if (is.null(covariates)) {	# no covariates
 		out.data <- matrix(
 			nrow = length(truncation.thresholds),	# one line per cut point
 			ncol = (3 + length(stats.to.keep))	# keep track of all stats for the group variable, and n, wald.p and global PH p
@@ -45,7 +50,7 @@ multi.point.HR.table <- function(all.groups = NULL, all.survtime = NULL, all.sur
 	else{	# need to add extra columns for each covariate
 		# determine the number of levels per covariate
 		n.levels <- 1;	# for the groups variable
-		for(x in 1:ncol(covariates)){
+		for (x in 1:ncol(covariates)) {
 			if(length(levels(covariates[,x])) > 0){
 				n.levels <- n.levels + length(levels(covariates[,x])) - 1;
 				covariates[,x] <- as.factor(covariates[,x]);
@@ -80,7 +85,7 @@ multi.point.HR.table <- function(all.groups = NULL, all.survtime = NULL, all.sur
 		surv.stat <- interval.data$status;
 
 		if (length(to.remove) > 0) {
-			# cat("REMOVING: ", to.remove); cat(" BEFORE: ", length(revised.groups));
+			# cat('REMOVING: ', to.remove); cat(' BEFORE: ', length(revised.groups));
 			revised.groups <- revised.groups[-to.remove];
 			if(!is.null(revised.covariates)){
 				revised.covariates <- revised.covariates[-to.remove , ];
@@ -102,18 +107,16 @@ multi.point.HR.table <- function(all.groups = NULL, all.survtime = NULL, all.sur
 			coxmodel <- summary(coxfit);
 
 			# Perform cox.zph test on cox.model
-			cox.zph.test <- cox.zph(coxfit, transform = "identity");
-		
+			cox.zph.test <- cox.zph(coxfit, transform = 'identity');
 			# extract summary characteristics from the Cox fits and PH test
-			n 			<-  length(revised.groups[!is.na(revised.groups)]);
-			wald.p 		<- coxmodel$waldtest[3];
-			global.ph.p <- cox.zph.test$table[nrow(cox.zph.test$table), "p"];	# save the GLOBAL p-value.
-
+			n <- length(revised.groups[!is.na(revised.groups)]);
+			wald.p <- coxmodel$waldtest[3];
+			global.ph.p <- cox.zph.test$table[nrow(cox.zph.test$table), 'p'];	# save the GLOBAL p-value.
 			out.data[index , ] <- c(n, wald.p, global.ph.p, coxmodel$conf.int[c(1,3,4)], coxmodel$coef[5], cox.zph.test$table[1, 'p']);
 			}
 		# we do have covariates, need to do some reformatting of the Cox output to put everything on one line
 		else{
-			if(length(unique(surv.stat)) == 1){		# all patients are in the same survival state, set  everything to NA
+			if (length(unique(surv.stat)) == 1) {		# all patients are in the same survival state, set  everything to NA
 				out.data[index,] <- rep(NA, ncol(out.data));
 				}
 			else{
@@ -127,19 +130,19 @@ multi.point.HR.table <- function(all.groups = NULL, all.survtime = NULL, all.sur
 				coxmodel <- summary(coxfit);
 
 				# Perform cox.zph test on cox.model
-				cox.zph.test <- cox.zph(coxfit, transform = "identity");
+				cox.zph.test <- cox.zph(coxfit, transform = 'identity');
 
 				# extract summary characteristics from the Cox fits and PH test
-				n 			<-  length(revised.groups[!is.na(revised.groups)]);
-				wald.p 		<- coxmodel$waldtest[3];
-				global.ph.p <- cox.zph.test$table[nrow(cox.zph.test$table), "p"];	# save the GLOBAL p-value.
+				n <- length(revised.groups[!is.na(revised.groups)]);
+				wald.p <- coxmodel$waldtest[3];
+				global.ph.p <- cox.zph.test$table[nrow(cox.zph.test$table), 'p']; # save the GLOBAL p-value.
 
 				cox.data <- data.frame(
-					hr		= coxmodel$conf.int[,1],
-					ci95l	= coxmodel$conf.int[,3],
-					ci95u	= coxmodel$conf.int[,4],
-					pval	= coxmodel$coef[,5],
-					ph.p 	= cox.zph.test$table[-nrow(cox.zph.test$table), "p"]	# take all but last element (This is the GLOBAL p-value)
+					hr = coxmodel$conf.int[,1],
+					ci95l = coxmodel$conf.int[,3],
+					ci95u = coxmodel$conf.int[,4],
+					pval = coxmodel$coef[,5],
+					ph.p = cox.zph.test$table[-nrow(cox.zph.test$table), 'p'] # take all but last element (This is the GLOBAL p-value)
 					);
 
 				# format as desired, stats as columns, and chunks of columns denote different variables from the Cox model
@@ -158,13 +161,13 @@ multi.point.HR.table <- function(all.groups = NULL, all.survtime = NULL, all.sur
 
 	# add row names to table and return it
 	rownames(out.data) <- c(paste0('Time', truncation.thresholds));
-	if(is.null(covariates)){
+	if (is.null(covariates)) {
 		# make column names specific to the variable and stat combination
 		colnames(out.data) <- 	c(
 			'n',
 			'wald.p',
 			'global.ph.p',
-			paste('group', stats.to.keep, sep = "_")
+			paste('group', stats.to.keep, sep = '_')
 			);
 		}
 	else{
@@ -175,7 +178,7 @@ multi.point.HR.table <- function(all.groups = NULL, all.survtime = NULL, all.sur
 			paste(
 				unlist(lapply(rownames(coxmodel$conf.int), function(f) rep(f, length(stats.to.keep)))),
 				stats.to.keep,
-				sep = "_"
+				sep = '_'
 				)
 			);
 		}
